@@ -1,0 +1,32 @@
+### Its very dirty thing but it works so its okay for me
+
+### SERVICES
+declare -A services=()
+declare -a serviceNames=()
+
+addService() {
+    serviceNames+=("$1")
+    services["$1_unit"]="$2"
+    services["$1_port"]="$3"
+    services["$1_path"]="$4"
+}
+## addService displayname unit port configpath
+addService nginx nginx 13808 ""
+
+systemd_output=$(LC_ALL=C systemctl --all --type=service,automount)
+
+for service in "${serviceNames[@]}"; do
+
+if [ "n$service" != "n" ]; then
+  unit=${services[${service}_unit]}
+  stat=$(awk -v unit="$unit" '$0~unit' <<<"$systemd_output" | awk '{if ($4=="running" || ($4=="exited" && $3=="active")) {printf "\033[0;32m Working"} else {printf      "\033[0;31m Failed"}   gsub(".service","",$1); gsub(".automount","",$1);  printf " \033[0m"} END {printf "\n"}')
+  [ "n$stat" == "n" ] && stat="\033[0;34m [Not found] \033[0;31m" ## fix it
+  else
+   stat="[Empty]"
+fi
+
+port_status=$( ss -ltpnu4 | grep -q "\:${services[${service}_port]}" && printf "\033[0;32m" || printf "\033[0;31m"; printf "${services[${service}_port]} \033[0m")
+
+printf "\t $service unit $unit $stat $port_status \n"
+
+done
