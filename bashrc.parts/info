@@ -1,5 +1,14 @@
 ### Its very dirty thing but it works so its okay for me
 
+## SOME BASIC INFO
+printf "\033[0;33m\tHost:  \033[0m  "; hostname -f
+main_int=$(ip -o r get 1.1.1.1  | cut -f 3 -d " ")
+main_ip=$(ip -o -4 a show $main_int | awk '$4 !~ '/127.0.0.1.*/' {print $4}')
+printf "\t\033[0;33mNetwork:\033[0m $main_ip on $main_int \n"
+df -h | awk '/\/$/ {print "\t\033[0;33mDisk:\033[0m    "   $5   " (used "   $3   " of "   $2   ")" }'
+free -h | awk 'NR==2 {print "\t\033[0;33mMemory:\033[0m  "   $7   " available from " $2}'
+
+
 ### SERVICES
 declare -A services=()
 declare -a serviceNames=()
